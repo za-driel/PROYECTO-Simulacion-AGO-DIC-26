@@ -100,6 +100,27 @@ python run.py
 
 Abre http://127.0.0.1:5000, crea una cuenta y presenta el examen de práctica.
 
+## Ejecutar con Docker
+
+Docker Desktop debe estar iniciado. Después, crea las variables locales a partir del ejemplo:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edita las contraseñas de `.env` y ejecuta la aplicación con:
+
+```powershell
+docker compose up --build -d
+```
+
+La aplicación estará disponible en http://localhost:5000. Los datos de MySQL se conservan en el volumen Docker `mysql_data`. Para reiniciarlos desde cero:
+
+```powershell
+docker compose down -v
+docker compose up --build -d
+```
+
 ## Estructura del proyecto (MVC)
 
 ```

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado · English Practice{% endblock %}
+{% block contenido %}
+<h1>{{ titulo }}</h1>
+<p class="subtitulo">Resultado del intento {{ r.numero_intento }} de {{ intentos_max }}</p>
+
+<section class="tarjeta resultado {{ 'aprobado' if r.aprobado else 'no-aprobado' }}">
+  <p class="porcentaje">{{ '%.0f'|format(r.calificacion) }}%</p>
+  <p class="veredicto">
+    {% if r.aprobado %}Aprobado{% else %}No aprobado{% endif %}
+  </p>
+  <p>
+    {% if r.nivel_resultado %}
+      Tu nivel de inglés alcanzado es <strong>{{ r.nivel_resultado }}</strong>.
+    {% else %}
+      Aún no alcanzas el nivel <strong>Básico</strong>.
+    {% endif %}
+    {% if not r.aprobado %}Necesitas {{ minimo }}% o más para aprobar.{% endif %}
+  </p>
+</section>
+
+<section class="tarjeta">
+  <h2>Detalle</h2>
+  <p>Correctas: {{ r.correctas }}. Incorrectas: {{ r.incorrectas }}. Sin responder (tiempo agotado): {{ r.sin_responder }}.</p>
+  <table class="tabla">
+    <thead>
+      <tr><th scope="col">Nivel</th><th scope="col">Correctas</th><th scope="col">Porcentaje</th></tr>
+    </thead>
+    <tbody>
+      {% for n in r.por_nivel %}
+      <tr><th scope="row">{{ n.nombre_nivel }}</th><td>{{ n.correctas }} de {{ n.total }}</td><td>{{ '%.0f'|format(n.porcentaje) }}%</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<p><a class="btn btn-primario" href="{{ url_for('menu.principal') }}">Volver al menú</a></p>
+{% endblock %}

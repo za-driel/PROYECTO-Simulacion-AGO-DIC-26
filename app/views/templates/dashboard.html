@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard · English Practice{% endblock %}
+{% block clase_main %}dashboard{% endblock %}
+{% block contenido %}
+<h1>Dashboard administrativo</h1>
+<p class="subtitulo">Resumen general de usuarios y simuladores.</p>
+
+<div class="tarjetas-principales">
+  <section class="tarjeta tarjeta-alumnos"><h2>{{ resumen.alumnos }}</h2><p>Alumnos</p></section>
+  <section class="tarjeta tarjeta-administradores"><h2>{{ resumen.administradores }}</h2><p>Administradores</p></section>
+</div>
+
+<div class="tarjetas-resumen">
+  <section class="tarjeta tarjeta-azul"><h2>{{ resumen.practicas }}</h2><p>Prácticas terminadas</p></section>
+  <section class="tarjeta tarjeta-gris"><h2>{{ resumen.finales }}</h2><p>Pruebas finales terminadas</p></section>
+  <section class="tarjeta tarjeta-verde"><h2>{{ resumen.promedio_practica }}%</h2><p>Promedio de práctica</p></section>
+  <section class="tarjeta tarjeta-amarillo"><h2>{{ resumen.promedio_final }}%</h2><p>Promedio final</p></section>
+</div>
+
+<div class="cuadricula-dashboard">
+  <section class="tarjeta grafica">
+    <h2>Práctica vs. examen final</h2>
+    <canvas id="comparacionChart" aria-label="Promedios de práctica y prueba final"></canvas>
+  </section>
+
+  <section class="tarjeta grafica">
+    <h2>Calificación por intento</h2>
+    <canvas id="evolucionChart" aria-label="Promedio por número de intento"></canvas>
+  </section>
+
+  <section class="tarjeta grafica">
+    <h2>Aprobados</h2>
+    <canvas id="aprobadosChart" aria-label="Aprobados en práctica y prueba final"></canvas>
+  </section>
+
+  <section class="tarjeta grafica">
+    <h2>Niveles obtenidos en la prueba final</h2>
+    <canvas id="nivelesChart" aria-label="Distribución de niveles obtenidos"></canvas>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const resumen = {{ resumen | tojson }};
+  const opciones = {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } }
+  };
+
+  new Chart(document.getElementById('comparacionChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Práctica', 'Examen final'],
+      datasets: [{ label: 'Calificación promedio', data: [resumen.promedio_practica, resumen.promedio_final], backgroundColor: ['#7b9da8', '#d4a72c'] }]
+    },
+    options: opciones
+  });
+
+  const practicaEvolucion = resumen.evolucion_practica;
+  const finalEvolucion = resumen.evolucion_final;
+  new Chart(document.getElementById('evolucionChart'), {
+    type: 'line',
+    data: {
+      labels: [...new Set([...practicaEvolucion.map(x => x[0]), ...finalEvolucion.map(x => x[0])])],
+      datasets: [
+        { label: 'Práctica', data: practicaEvolucion.map(x => x[1]), borderColor: '#7b9da8', tension: .2 },
+        { label: 'Examen final', data: finalEvolucion.map(x => x[1]), borderColor: '#d4a72c', tension: .2 }
+      ]
+    },
+    options: opciones
+  });
+
+  const totalPractica = resumen.practicas;
+  const totalFinal = resumen.finales;
+  new Chart(document.getElementById('aprobadosChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Práctica', 'Examen final'],
+      datasets: [
+        { label: 'Aprobados', data: [resumen.aprobados_practica, resumen.aprobados_final], backgroundColor: '#5b8c6f' },
+        { label: 'No aprobados', data: [totalPractica - resumen.aprobados_practica, totalFinal - resumen.aprobados_final], backgroundColor: '#c66b5b' }
+      ]
+    },
+    options: { ...opciones, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+  });
+
+  const niveles = resumen.niveles_final;
+  new Chart(document.getElementById('nivelesChart'), {
+    type: 'doughnut',
+    data: {
+      labels: niveles.map(x => x[0]),
+      datasets: [{ data: niveles.map(x => x[1]), backgroundColor: ['#7b9da8', '#d4a72c', '#5b8c6f', '#c66b5b'] }]
+    },
+    options: opciones
+  });
+</script>
+{% endblock %}

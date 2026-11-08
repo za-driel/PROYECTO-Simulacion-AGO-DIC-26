@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Simulador de inglés{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+  <header class="barra">
+    <a class="marca" href="{{ url_for('auth.inicio') }}">English Practice</a>
+    {% if session.get('usuario_id') %}
+    <form class="salir" method="post" action="{{ url_for('auth.logout') }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      {% if session.get('rol') == 'administrador' %}
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-texto">Dashboard</a>
+      <a href="{{ url_for('admin.panel') }}" class="btn btn-texto">Administración</a>
+      {% endif %}
+      <span class="usuario">{{ session.get('nombre') }}</span>
+      <button type="submit" class="btn btn-texto">Cerrar sesión</button>
+    </form>
+    {% endif %}
+  </header>
+
+  <main class="contenedor {% block clase_main %}{% endblock %}">
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% if mensajes %}
+      <div class="avisos" role="alert">
+        {% for categoria, texto in mensajes %}
+        <p class="aviso aviso-{{ categoria }}">{{ texto }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block contenido %}{% endblock %}
+  </main>
+</body>
+</html>

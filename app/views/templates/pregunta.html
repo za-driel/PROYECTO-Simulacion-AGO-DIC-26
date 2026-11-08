@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}: pregunta {{ numero }} de {{ total }} · English Practice{% endblock %}
+{% block clase_main %}examen{% endblock %}
+{% block contenido %}
+<p class="examen-etiqueta">{{ titulo }}</p>
+<div id="temporizador" role="timer" class="temporizador"
+     data-total="{{ segundos_total }}" data-restante="{{ '%.3f'|format(segundos_restantes) }}">
+  <div class="temporizador-datos">
+    <span>Pregunta {{ numero }} de {{ total }}</span>
+    <span class="temporizador-tiempo"><span id="tiempo-texto">{{ segundos_restantes|round(0, 'ceil')|int }}</span> s</span>
+  </div>
+  <div class="temporizador-pista"><div id="tiempo-barra" class="temporizador-barra"></div></div>
+</div>
+
+<form id="form-pregunta" method="post" action="{{ url_responder }}" class="hoja">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="detalle_id" value="{{ detalle_id }}">
+  <input type="hidden" name="tiempo_agotado" value="0">
+
+  <fieldset>
+    <legend class="enunciado">{{ pregunta.texto_pregunta }}</legend>
+    {% if pregunta.imagen_url %}
+    <img class="imagen-pregunta" src="{{ pregunta.imagen_url }}" alt="Imagen de apoyo para la pregunta">
+    {% endif %}
+
+    <div class="opciones">
+      {% for op in pregunta.opciones %}
+      <label class="opcion">
+        <input type="radio" name="opcion" value="{{ op.letra }}">
+        <span class="opcion-letra">{{ 'ABCD'[loop.index0] }}</span>
+        <span class="opcion-texto">{{ op.texto }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <button id="btn-responder" type="submit" class="btn btn-primario">Responder</button>
+</form>
+
+<script src="{{ url_for('static', filename='js/temporizador.js') }}"></script>
+{% endblock %}
