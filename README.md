@@ -14,6 +14,7 @@ Aplicación web para practicar inglés y ubicar al alumno en un nivel **básico,
 | Simulador final (40 preguntas, hasta 2 intentos, cada reactivo = 2.5 pts) | Listo |
 | Dashboard administrativo (práctica vs. final) | Listo |
 | Ejecución con Docker | Listo |
+| Datos simulados | Pendiente |
 
 ## Tecnologías
 
