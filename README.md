@@ -28,15 +28,16 @@ Aplicación web para practicar inglés y ubicar al alumno en un nivel **básico,
 
 Todo el proyecto corre en contenedores: la aplicación y la base de datos. Así el equipo usa exactamente la misma versión de MySQL sin instalar nada más que Docker.
 
-### 1. Instalar Docker Desktop
+### 1. Descargar Docker Desktop
 
-Descárgalo desde https://www.docker.com/products/docker-desktop/ e instálalo. Ábrelo y espera a que indique que está en ejecución.
-
-**Si en Windows marca un error relacionado con WSL 2**, abre PowerShell como administrador y ejecuta:
+**Antes de iniciar con la instalacion**, abre PowerShell como administrador y ejecuta:
 
 ```powershell
 wsl --install
 ```
+Una vez realizado el comando en PowerShell, proceder con la instalación de Docker
+
+Descárgalo desde https://www.docker.com/products/docker-desktop/ e instálalo. Ábrelo y espera a que indique que está en ejecución.
 
 Reinicia el equipo, vuelve a abrir Docker Desktop (o instálalo de nuevo si no se había instalado) y continúa.
 
@@ -45,7 +46,7 @@ Reinicia el equipo, vuelve a abrir Docker Desktop (o instálalo de nuevo si no s
 Clona el repositorio o descarga el ZIP y descomprímelo:
 
 ```bash
-git clone <URL-DEL-REPOSITORIO>
+git clone <[URL-DEL-REPOSITORIO](https://github.com/za-driel/PROYECTO-Simulacion-AGO-DIC-26)>
 cd <carpeta-del-repositorio>
 ```
 
