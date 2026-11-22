@@ -14,7 +14,6 @@ Aplicación web para practicar inglés y ubicar al alumno en un nivel **básico,
 | Simulador final (40 preguntas, hasta 2 intentos, cada reactivo = 2.5 pts) | Listo |
 | Dashboard administrativo (práctica vs. final) | Listo |
 | Ejecución con Docker | Listo |
-| Datos simulados | Pendiente |
 
 ## Tecnologías
 
@@ -28,16 +27,15 @@ Aplicación web para practicar inglés y ubicar al alumno en un nivel **básico,
 
 Todo el proyecto corre en contenedores: la aplicación y la base de datos. Así el equipo usa exactamente la misma versión de MySQL sin instalar nada más que Docker.
 
-### 1. Descargar Docker Desktop
+### 1. Instalar Docker Desktop
 
-**Antes de iniciar con la instalacion**, abre PowerShell como administrador y ejecuta:
+Descárgalo desde https://www.docker.com/products/docker-desktop/ e instálalo. Ábrelo y espera a que indique que está en ejecución.
+
+**Si en Windows marca un error relacionado con WSL 2**, abre PowerShell como administrador y ejecuta:
 
 ```powershell
 wsl --install
 ```
-Una vez realizado el comando en PowerShell, proceder con la instalación de Docker
-
-Descárgalo desde https://www.docker.com/products/docker-desktop/ e instálalo. Ábrelo y espera a que indique que está en ejecución.
 
 Reinicia el equipo, vuelve a abrir Docker Desktop (o instálalo de nuevo si no se había instalado) y continúa.
 
@@ -46,7 +44,7 @@ Reinicia el equipo, vuelve a abrir Docker Desktop (o instálalo de nuevo si no s
 Clona el repositorio o descarga el ZIP y descomprímelo:
 
 ```bash
-git clone <[URL-DEL-REPOSITORIO](https://github.com/za-driel/PROYECTO-Simulacion-AGO-DIC-26)>
+git clone <URL-DEL-REPOSITORIO>
 cd <carpeta-del-repositorio>
 ```
 
@@ -139,16 +137,17 @@ app/
     menu_controller.py        /menu
     practica_controller.py    /practica/...
     final_controller.py       /final/...
+    examen_comun.py           lógica compartida: bloques por nivel y aviso de cambio de nivel
     admin_controller.py       /administracion  /administracion/dashboard
   views/templates/            V — plantillas HTML (Jinja)
-  static/                     CSS y JavaScript
+  static/                     CSS, JavaScript e imágenes de las preguntas (static/img/preguntas/)
 database/
   simulador_ingles_mysql.sql  script oficial de la BD (esquema + datos); lo carga Docker
 ```
 
 ## Reglas del simulador de práctica
 
-- Cada intento sortea **20 preguntas al azar**: 6 de nivel Básico, 9 Intermedio y 5 Avanzado. No se repiten dentro de la misma prueba.
+- Cada intento sortea **20 preguntas al azar**: 6 de nivel Básico, 7 Intermedio y 7 Avanzado. No se repiten dentro de la misma prueba.
 - Cada pregunta tiene **60 segundos**. El tiempo lo controla el servidor (columna `fecha_presentada`), así que recargar la página no reinicia el reloj. Si se agota, la pregunta cuenta como incorrecta y se pasa a la siguiente.
 - Cada pregunta vale **5 puntos**. Se aprueba con **70 % o más**.
 - Máximo **5 intentos** por usuario. Si hay un examen sin terminar, el menú permite continuarlo.
@@ -157,7 +156,7 @@ database/
 
 ## Reglas del simulador final
 
-- Cada intento sortea **40 preguntas al azar**: 12 Básico, 18 Intermedio y 10 Avanzado. No se repiten dentro de la misma prueba.
+- Cada intento sortea **40 preguntas al azar**: 13 Básico, 13 Intermedio y 14 Avanzado. No se repiten dentro de la misma prueba.
 - Máximo **2 intentos** por usuario. Cada pregunta vale **2.5 puntos** (100 / 40) y se aprueba con **70 % o más**.
 - Funciona igual que la práctica: 60 segundos por pregunta controlados por el servidor, opciones en orden aleatorio, continuar un examen abierto y resultado con porcentaje, aprobado y nivel.
 - El nivel se calcula con la misma regla que en la práctica, para que ambos exámenes sean comparables en el dashboard.
@@ -169,6 +168,28 @@ docker compose up -d
 ```
 
 Los intentos de prueba se guardan en la BD como cualquier otro. Si te quedas sin intentos, reinicia la BD con `docker compose down -v` y `docker compose up -d --build`.
+
+## Bloques por nivel y preguntas con imagen
+
+**Bloques por nivel.** Los dos exámenes se presentan en tres bloques seguidos: primero el nivel Básico, luego el Intermedio y al final el Avanzado. Las preguntas se sortean al azar, pero solo dentro de su bloque.
+
+- Al entrar a cada bloque aparece una pantalla de aviso: "Comenzamos con el nivel básico", "Ahora avanzamos al nivel intermedio" y "Ahora avanzamos al nivel avanzado".
+- El reloj de la primera pregunta del bloque **no corre mientras se muestra el aviso**; empieza cuando el alumno presiona el botón.
+- En cada pregunta se indica qué nivel se está evaluando y el avance dentro del bloque, por ejemplo "Evaluando: nivel básico (pregunta 2 de 6)".
+- Si el alumno cierra la página a mitad de un bloque y regresa, continúa donde iba y no vuelve a ver el aviso.
+
+**Preguntas con imagen.** El banco incluye 15 preguntas con ilustración, 5 por nivel: describir acciones, personas, ropa, lugares, la hora y emociones.
+
+- En cada bloque entran entre **2 y 4** preguntas con imagen; la cantidad exacta se sortea. El rango se cambia con `IMAGENES_POR_NIVEL` en `config.py`.
+- Las imágenes son archivos SVG en `app/static/img/preguntas/`. Para cambiar una por otra imagen (foto, PNG, JPG) basta con subir el archivo a esa carpeta y actualizar la columna `imagen_url` de la pregunta en `database/simulador_ingles_mysql.sql`. Una pregunta es "con imagen" cuando su `imagen_url` no está vacía.
+- Para agregar una pregunta con imagen: guarda el archivo en esa carpeta, agrega la pregunta y sus 4 opciones en el SQL con su `imagen_url` (por ejemplo `/static/img/preguntas/mi_imagen.svg`) y mantén el total del banco en 80 preguntas.
+
+**Cargar el banco nuevo.** El script SQL solo corre con el volumen de MySQL vacío. Si ya tenías la base creada, reiníciala para que cargue las preguntas actualizadas (se borran los datos de prueba):
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
 
 ## Dashboard administrativo
 
@@ -182,7 +203,7 @@ Tablas principales:
 |---|---|
 | `niveles` | Básico, Intermedio, Avanzado |
 | `usuarios` | Cuenta (contraseña con hash) y rol: `alumno` o `administrador` |
-| `preguntas` | Banco de 80 preguntas, con `imagen_url` opcional |
+| `preguntas` | Banco de 80 preguntas; 15 llevan imagen (`imagen_url`) |
 | `opciones` | 4 opciones por pregunta; exactamente una correcta |
 | `intentos_practica` / `detalle_intentos_practica` | Intentos de práctica y sus 20 preguntas |
 | `intentos_finales` / `detalle_intentos_finales` | Intentos del simulador final y sus 40 preguntas |
