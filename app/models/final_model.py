@@ -63,11 +63,11 @@ def siguiente_pendiente(intento_id):
     """Primera pregunta sin resolver (es_correcta NULL), con los segundos transcurridos desde que se mostró."""
     with get_db().cursor() as cur:
         cur.execute(
-            "SELECT detalle_final_id AS detalle_id, pregunta_id, orden, fecha_presentada, "
+            "SELECT d.detalle_final_id AS detalle_id, d.pregunta_id, d.orden, p.nivel_id, d.fecha_presentada, "
             "TIMESTAMPDIFF(MICROSECOND, fecha_presentada, NOW(3)) AS micros "
-            "FROM detalle_intentos_finales "
-            "WHERE intento_final_id = %s AND es_correcta IS NULL "
-            "ORDER BY orden LIMIT 1",
+            "FROM detalle_intentos_finales d JOIN preguntas p ON p.pregunta_id = d.pregunta_id "
+            "WHERE d.intento_final_id = %s AND d.es_correcta IS NULL "
+            "ORDER BY d.orden LIMIT 1",
             (intento_id,),
         )
         fila = cur.fetchone()
@@ -103,10 +103,11 @@ def expirar(detalle_id):
     return afectadas == 1
 
 
-def obtener_pregunta_actual(intento_id):
+def obtener_pregunta_actual(intento_id, iniciar_tiempo=True):
     """Devuelve la pregunta que debe responder el alumno ahora, o None si ya terminó.
 
-    - Si la pregunta aún no se había mostrado, inicia su minuto.
+    - Si la pregunta aún no se había mostrado, inicia su minuto (salvo iniciar_tiempo=False, que solo la consulta;
+      se usa para mostrar primero el aviso de cambio de nivel sin gastar tiempo del alumno).
     - Si el alumno dejó vencer el minuto (cerró la pestaña, se fue), la marca como errónea
       y avanza a la siguiente, repitiendo hasta encontrar una vigente.
     """
@@ -117,6 +118,8 @@ def obtener_pregunta_actual(intento_id):
         if fila is None:
             return None
         if fila["transcurrido"] is None:
+            if not iniciar_tiempo:
+                return fila
             _marcar_presentada(fila["detalle_id"])
             fila["transcurrido"] = 0.0
             return fila
@@ -124,6 +127,18 @@ def obtener_pregunta_actual(intento_id):
             expirar(fila["detalle_id"])
             continue
         return fila
+
+
+def info_bloque(intento_id, nivel_id):
+    """Primer número de orden y cantidad de preguntas del bloque de un nivel dentro del intento."""
+    with get_db().cursor() as cur:
+        cur.execute(
+            "SELECT MIN(d.orden) AS primer_orden, COUNT(*) AS total "
+            "FROM detalle_intentos_finales d JOIN preguntas p ON p.pregunta_id = d.pregunta_id "
+            "WHERE d.intento_final_id = %s AND p.nivel_id = %s",
+            (intento_id, nivel_id),
+        )
+        return cur.fetchone()
 
 
 # ---------------------------------------------------------------- respuesta

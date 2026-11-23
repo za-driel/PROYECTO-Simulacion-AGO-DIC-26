@@ -2,6 +2,7 @@
 from flask import (Blueprint, abort, current_app, flash, redirect, render_template,
                    request, session, url_for)
 
+from app.controllers import examen_comun
 from app.models import final_model, pregunta_model
 from app.security import login_required
 
@@ -46,26 +47,18 @@ def pregunta(intento_id):
     intento = _intento_del_usuario(intento_id)
     if intento["fecha_fin"] is not None:
         return redirect(url_for("final.resultado", intento_id=intento_id))
+    total = sum(current_app.config["FINAL_PREGUNTAS_POR_NIVEL"].values())
+    return examen_comun.mostrar_pregunta(final_model, "final", intento_id, "Examen final", total)
 
-    actual = final_model.obtener_pregunta_actual(intento_id)
-    if actual is None:                                  # no quedan preguntas: cerrar y calificar
-        final_model.finalizar(intento_id)
-        return redirect(url_for("final.resultado", intento_id=intento_id))
 
-    cfg = current_app.config
-    contenido = pregunta_model.obtener_con_opciones(actual["pregunta_id"], semilla=actual["detalle_id"])
-    return render_template(
-        "pregunta.html",
-        intento_id=intento_id,
-        detalle_id=actual["detalle_id"],
-        numero=actual["orden"],
-        total=sum(cfg["FINAL_PREGUNTAS_POR_NIVEL"].values()),
-        pregunta=contenido,
-        titulo="Examen final",
-        url_responder=url_for("final.responder", intento_id=intento_id),
-        segundos_total=cfg["SEGUNDOS_POR_PREGUNTA"],
-        segundos_restantes=max(0.0, cfg["SEGUNDOS_POR_PREGUNTA"] - actual["transcurrido"]),
-    )
+@bp.route("/<int:intento_id>/continuar", methods=["POST"])
+@login_required
+def continuar(intento_id):
+    """El alumno leyó el aviso de cambio de nivel y quiere empezar el bloque."""
+    intento = _intento_del_usuario(intento_id)
+    if intento["fecha_fin"] is None:
+        examen_comun.continuar_bloque(final_model, "final", intento_id)
+    return redirect(url_for("final.pregunta", intento_id=intento_id))
 
 
 @bp.route("/<int:intento_id>/responder", methods=["POST"])

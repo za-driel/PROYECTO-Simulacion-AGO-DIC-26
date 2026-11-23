@@ -3,6 +3,7 @@
 {% block clase_main %}examen{% endblock %}
 {% block contenido %}
 <p class="examen-etiqueta">{{ titulo }}</p>
+<p class="nivel-chip nivel-{{ nivel_id }}">Evaluando: nivel {{ nivel|lower }} (pregunta {{ posicion_bloque }} de {{ total_bloque }})</p>
 <div id="temporizador" role="timer" class="temporizador"
      data-total="{{ segundos_total }}" data-restante="{{ '%.3f'|format(segundos_restantes) }}">
   <div class="temporizador-datos">
@@ -20,7 +21,7 @@
   <fieldset>
     <legend class="enunciado">{{ pregunta.texto_pregunta }}</legend>
     {% if pregunta.imagen_url %}
-    <img class="imagen-pregunta" src="{{ pregunta.imagen_url }}" alt="Imagen de apoyo para la pregunta">
+    <img class="imagen-pregunta" src="{{ pregunta.imagen_url }}" alt="Imagen de la pregunta">
     {% endif %}
 
     <div class="opciones">

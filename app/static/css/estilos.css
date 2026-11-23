@@ -162,7 +162,7 @@ p { margin: 0 0 1rem; }
   font-family: var(--serif); font-size: 1.4rem; line-height: 1.45;
   white-space: pre-line; padding: 0; margin-bottom: 1.5rem; max-width: 36rem;
 }
-.imagen-pregunta { max-width: 100%; height: auto; margin-bottom: 1.5rem; }
+.imagen-pregunta { display: block; max-width: 100%; height: auto; margin: 0 0 1.5rem; border: 1px solid var(--borde); background: #fff; }
 
 .opciones { display: grid; gap: .6rem; }
 .opcion {
@@ -193,3 +193,11 @@ p { margin: 0 0 1rem; }
   .hoja { padding: 1.25rem 1rem; }
   .enunciado { font-size: 1.2rem; }
 }
+
+/* ---- bloques por nivel ---- */
+.nivel-chip { display: inline-block; margin: 0 0 .75rem; padding: .25rem .75rem; border: 2px solid var(--tinta); font-size: .9rem; font-weight: 700; }
+.nivel-chip.nivel-1, .aviso-nivel.nivel-1 { background: #d9f2e3; }
+.nivel-chip.nivel-2, .aviso-nivel.nivel-2 { background: #fff1c2; }
+.nivel-chip.nivel-3, .aviso-nivel.nivel-3 { background: #e6dcf7; }
+.aviso-nivel { border: 2px solid var(--tinta); padding: 2rem 1.75rem; }
+.aviso-nivel h1 { margin-bottom: 1rem; }
