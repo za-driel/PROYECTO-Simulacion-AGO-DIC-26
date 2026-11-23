@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block titulo %}Error {{ codigo }} · English Practice{% endblock %}
+{% block clase_main %}angosto{% endblock %}
+{% block contenido %}
+<h1>{% if codigo == 404 %}No encontramos esa página{% else %}No pudimos procesar la solicitud{% endif %}</h1>
+<p class="subtitulo">{% if codigo == 400 %}Tu sesión pudo haber caducado. Vuelve a cargar la página e inténtalo de nuevo.{% else %}Revisa la dirección o vuelve al inicio.{% endif %}</p>
+<p><a class="btn btn-primario" href="{{ url_for('auth.inicio') }}">Ir al inicio</a></p>
+{% endblock %}

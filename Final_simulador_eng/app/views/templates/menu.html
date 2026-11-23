@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Menú · English Practice{% endblock %}
+{% block contenido %}
+<h1>Hola, {{ session.get('nombre') }}</h1>
+<p class="subtitulo">Tienes {{ segundos }} segundos para responder cada pregunta; si se acaba el tiempo cuenta como incorrecta y pasas a la siguiente. Apruebas con {{ minimo }}% o más.</p>
+
+{% for e in examenes %}
+<section class="tarjeta">
+  <h2>{{ e.titulo }}</h2>
+  <p>{{ e.descripcion }}</p>
+  <p>{{ e.total }} preguntas. Intentos usados: <strong>{{ e.usados }} de {{ e.maximo }}</strong>.</p>
+
+  {% if e.en_curso %}
+    <p class="aviso aviso-info">Tienes un examen en curso. Si lo dejas abierto, el tiempo de la pregunta actual sigue corriendo.</p>
+    <form method="post" action="{{ url_for(e.iniciar) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-primario">Continuar examen</button>
+    </form>
+  {% elif e.usados >= e.maximo %}
+    <p class="aviso aviso-error">Ya usaste tus {{ e.maximo }} intentos.</p>
+  {% else %}
+    <form method="post" action="{{ url_for(e.iniciar) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-primario">{{ e.boton }}</button>
+    </form>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}
